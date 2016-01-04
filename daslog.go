@@ -5,13 +5,13 @@
 // Simple example:
 //
 //      func main() {
-//      	o := Options{
-//			    Destination: os.Stdout,
-//			    Prefix:      "{{.O}} [{{.Q}}]: ",
-//			    LogLevel:    UrgencyLevelCritical,
+//      	o := daslog.Options{
+//              Destination: os.Stdout,
+//              Prefix:      "{{.O}} [{{.Q}}]: ",
+//              LogLevel:    daslog.UrgencyLevelCritical,
 //      	}
 //
-//      	l, err := New(o)
+//      	l, err := daslog.New(o)
 //      	if err != nil {
 //      		fmt.Print(err)
 //      		return
