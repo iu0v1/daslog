@@ -52,13 +52,13 @@ import (
 )
 
 func main() {
-	o := Options{
+	o := daslog.Options{
 		Destination: os.Stdout,
 		Prefix:      "{{.O}} [{{.Q}}]: ",
-		LogLevel:    UrgencyLevelCritical,
+		LogLevel:    daslog.UrgencyLevelCritical,
 	}
 
-	l, err := New(o)
+	l, err := daslog.New(o)
 	if err != nil {
 		fmt.Print(err)
 		return
