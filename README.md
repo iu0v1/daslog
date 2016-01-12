@@ -1,6 +1,6 @@
 # DASLOG
 
-Daslog is a simple logger service for Go (golang) programms.
+Daslog is a simple logger package for Go (golang) programms.
 
 **DA**mn **S**imple **LOG**ger.
 

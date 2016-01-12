@@ -1,4 +1,4 @@
-// Package daslog is a simple logger service.
+// Package daslog is a simple logger package.
 //
 // Explanation of the name: DAmn Simple LOGger.
 //
