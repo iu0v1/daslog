@@ -2,7 +2,6 @@ package daslog
 
 import (
 	"bytes"
-	"fmt"
 	"testing"
 )
 
@@ -19,8 +18,7 @@ func TestMain(t *testing.T) {
 
 	l, err := New(o)
 	if err != nil {
-		fmt.Print(err)
-		return
+		t.Fatalf("%v", err)
 	}
 
 	// notice in Log style
