@@ -37,6 +37,7 @@ import (
 	"io"
 	"os"
 	"regexp"
+	"strings"
 	"text/template"
 	"time"
 )
@@ -123,8 +124,11 @@ type prefixTemplateData struct {
 type Daslog struct {
 	options *Options
 
-	templateInPrefix bool
-	prefixTemplate   *template.Template
+	templateInPrefix  bool
+	timeTemplate      string
+	urgencyInTemplate bool
+
+	urgencyList []string
 }
 
 // New - return a new copy of Daslog.
@@ -143,20 +147,24 @@ func New(options Options) (*Daslog, error) {
 
 	if l.options.Prefix != "" {
 		if t, _ := regexp.MatchString("{{\\s*\\.\\w\\s*}}", l.options.Prefix); t {
-			// repleace all unexported letters
-			replaceList := []string{"r", "y", "m", "b", "d", "a", "p"}
+			// repleace all unexported letters and exceptions
+			replaceList := []string{"r", "y", "m", "b", "d", "a", "p", "Q"}
 			newPrefix := l.options.Prefix
 
 			for _, r := range replaceList {
 				a := regexp.MustCompile("{{\\s*\\." + r + "\\s*}}")
+				if r == "Q" {
+					newPrefix = a.ReplaceAllString(newPrefix, "<{Q}>")
+					l.urgencyInTemplate = true
+					continue
+				}
 				newPrefix = a.ReplaceAllString(newPrefix, "{{.O"+r+"}}")
 			}
 
 			l.options.Prefix = newPrefix
 
 			// prepare template
-			var err error
-			l.prefixTemplate, err = template.New("prefix").Parse(l.options.Prefix)
+			tmpl, err := template.New("prefix").Parse(l.options.Prefix)
 			if err != nil {
 				e := regexp.MustCompile("template: prefix:1")
 				return l, fmt.Errorf("%s\n", e.ReplaceAllString(err.Error(), "daslog: prefix error"))
@@ -166,13 +174,49 @@ func New(options Options) (*Daslog, error) {
 			// check unknown format variables and errors
 			var buf bytes.Buffer
 			dummyData := prefixTemplateData{}
-			if err := l.prefixTemplate.Execute(&buf, &dummyData); err != nil {
+			if err := tmpl.Execute(&buf, &dummyData); err != nil {
 				if e, _ := regexp.MatchString("is not a field of", err.Error()); e {
 					e := regexp.MustCompile("<\\..*>").FindAllString(err.Error(), -1)
 					ev := regexp.MustCompile("(<|>)").ReplaceAllString(e[0], "")
 					return l, fmt.Errorf("daslog: unknown format variable in prefix: {{%s}}\n", ev)
 				}
 				return l, err
+			}
+
+			// call template
+			buf.Reset()
+
+			data := prefixTemplateData{
+				F:  "2006-01-02",
+				T:  "15:04:05",
+				Or: "3:04:05 PM",
+				Y:  "2006",
+				Oy: "06",
+				Om: "01",
+				Ob: "Jan",
+				B:  "January",
+				Od: "02",
+				Oa: "Mon",
+				A:  "Monday",
+				H:  "15",
+				I:  "03",
+				M:  "04",
+				S:  "05",
+				Op: "PM",
+
+				O: "2006-01-02 15:04:05",
+			}
+
+			tmpl.Execute(&buf, &data)
+
+			l.timeTemplate = buf.String()
+
+			l.urgencyList = []string{
+				"none",
+				"notice",
+				"info",
+				"error",
+				"critical",
 			}
 		}
 	}
@@ -190,43 +234,10 @@ func (l *Daslog) logHandler(urgencyLevel UrgencyLevel, message string) {
 		prefix := l.options.Prefix
 
 		if l.templateInPrefix {
-			var buf bytes.Buffer
-
-			ul := map[UrgencyLevel]string{
-				UrgencyLevelNone:     "none",
-				UrgencyLevelNotice:   "notice",
-				UrgencyLevelInfo:     "info",
-				UrgencyLevelError:    "error",
-				UrgencyLevelCritical: "critical",
+			prefix = time.Now().Local().Format(l.timeTemplate)
+			if l.urgencyInTemplate {
+				prefix = strings.Replace(prefix, "<{Q}>", l.urgencyList[urgencyLevel], -1)
 			}
-
-			t := time.Now().Local()
-
-			data := prefixTemplateData{
-				F:  t.Format("2006-01-02"),
-				T:  t.Format("15:04:05"),
-				Or: t.Format("3:04:05 PM"),
-				Y:  t.Format("2006"),
-				Oy: t.Format("06"),
-				Om: t.Format("01"),
-				Ob: t.Format("Jan"),
-				B:  t.Format("January"),
-				Od: t.Format("02"),
-				Oa: t.Format("Mon"),
-				A:  t.Format("Monday"),
-				H:  t.Format("15"),
-				I:  t.Format("03"),
-				M:  t.Format("04"),
-				S:  t.Format("05"),
-				Op: t.Format("PM"),
-
-				O: t.Format("2006-01-02 15:04:05"),
-				Q: ul[urgencyLevel],
-			}
-
-			l.prefixTemplate.Execute(&buf, &data)
-
-			prefix = buf.String()
 		}
 
 		fmt.Fprintf(l.options.Destination, "%s%s\n", prefix, message)
