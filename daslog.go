@@ -17,7 +17,7 @@
 //      		return
 //      	}
 //
-//      	l.Log(UrgencyLevelNotice, "test notice message")
+//      	l.Log(daslog.UrgencyLevelNotice, "test notice message")
 //
 //      	l.Info("test info message")
 //

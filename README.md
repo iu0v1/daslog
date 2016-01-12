@@ -86,10 +86,10 @@ Compare with a `log` package.
 
 Daslog _equal_ to a `log`, when you use a _pure prefix_; in _~2x slower_, if you use _format options_ in a prefix; in _~2.5x slower_ if you use _`{{.Q}}` option_ in a prefix. Avoid to use Daslog, if you need high performance.
 ```
-BenchmarkLog-4                           2000000               836 ns/op             137 B/op          2 allocs/op
-BenchmarkDaslogPurePrefix-4              2000000               704 ns/op             106 B/op          4 allocs/op
-BenchmarkDaslogTemplatePrefix-4          1000000              1369 ns/op             199 B/op          5 allocs/op
-BenchmarkDaslogTemplatePrefixQ-4         1000000              1792 ns/op             270 B/op          7 allocs/op
+BenchmarkLog-4                         2000000       836 ns/op       137 B/op       2 allocs/op
+BenchmarkDaslogPurePrefix-4            2000000       704 ns/op       106 B/op       4 allocs/op
+BenchmarkDaslogTemplatePrefix-4        1000000      1369 ns/op       199 B/op       5 allocs/op
+BenchmarkDaslogTemplatePrefixQ-4       1000000      1792 ns/op       270 B/op       7 allocs/op
 ```
 
 ### DOC
