@@ -182,7 +182,7 @@ func New(options Options) (*Daslog, error) {
 			dummyData := prefixTemplateData{}
 			if err := tmpl.Execute(&buf, &dummyData); err != nil {
 				if e, _ := regexp.MatchString("is not a field of", err.Error()); e {
-					e := regexp.MustCompile("<\\..*>").FindAllString(err.Error(), -1)
+					e := regexp.MustCompile(`<\..*>`).FindAllString(err.Error(), -1)
 					ev := regexp.MustCompile("(<|>)").ReplaceAllString(e[0], "")
 					return l, fmt.Errorf("daslog: unknown format variable in prefix: {{%s}}\n", ev)
 				}
