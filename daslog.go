@@ -152,13 +152,13 @@ func New(options Options) (*Daslog, error) {
 	}
 
 	if l.options.Prefix != "" {
-		if t, _ := regexp.MatchString("{{\\s*\\.\\w\\s*}}", l.options.Prefix); t {
+		if t, _ := regexp.MatchString(`{{\s*\.\w\s*}}`, l.options.Prefix); t {
 			// repleace all unexported letters and exceptions
 			replaceList := []string{"r", "y", "m", "b", "d", "a", "p", "Q"}
 			newPrefix := l.options.Prefix
 
 			for _, r := range replaceList {
-				a := regexp.MustCompile("{{\\s*\\." + r + "\\s*}}")
+				a := regexp.MustCompile(`{{\s*\.` + r + `\s*}}`)
 				if r == "Q" {
 					newPrefix = a.ReplaceAllString(newPrefix, "<{Q}>")
 					l.urgencyInTemplate = true
@@ -179,8 +179,7 @@ func New(options Options) (*Daslog, error) {
 
 			// check unknown format variables and errors
 			var buf bytes.Buffer
-			dummyData := prefixTemplateData{}
-			if err := tmpl.Execute(&buf, &dummyData); err != nil {
+			if err := tmpl.Execute(&buf, &prefixTemplateData{}); err != nil {
 				if e, _ := regexp.MatchString("is not a field of", err.Error()); e {
 					e := regexp.MustCompile(`<\..*>`).FindAllString(err.Error(), -1)
 					ev := regexp.MustCompile("(<|>)").ReplaceAllString(e[0], "")
