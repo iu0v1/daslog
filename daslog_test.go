@@ -67,7 +67,7 @@ func TestMain(t *testing.T) {
 		}
 
 		if tst != outTests[i].E {
-			t.Fatalf("'%s' != '%s' (out test: #%d, name: %s)\n", outTests[i], tst, i, outTests[i].N)
+			t.Fatalf("'%s' != '%s' (out test: #%d, name: %s)\n", outTests[i].E, tst, i, outTests[i].N)
 		}
 	}
 
