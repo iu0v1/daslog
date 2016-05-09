@@ -107,6 +107,12 @@ type Options struct {
 	// Default: 'os.Stdout'.
 	Destination io.Writer
 
+	// Destinations provides the opportunity to choose several destinations
+	// for delivery of log messages.
+	//
+	// If 'Destinations' is selected - 'Destination' will be ignored.
+	Destinations []io.Writer
+
 	// LogHandler takes a log messages to bypass the internal
 	// mechanism of the message processing.
 	//
@@ -141,7 +147,7 @@ func New(options Options) (*Daslog, error) {
 		l.options.Handler = l.logHandler
 	}
 
-	if l.options.Destination == nil {
+	if l.options.Destination == nil && len(l.options.Destinations) == 0 {
 		l.options.Destination = os.Stdout
 	}
 
@@ -238,6 +244,13 @@ func (l *Daslog) logHandler(urgencyLevel UrgencyLevel, message string) {
 			if l.urgencyInTemplate {
 				prefix = strings.Replace(prefix, "<{Q}>", l.urgencyList[urgencyLevel], -1)
 			}
+		}
+
+		if len(l.options.Destinations) != 0 {
+			for _, destination := range l.options.Destinations {
+				fmt.Fprintf(destination, "%s%s\n", prefix, message)
+			}
+			return
 		}
 
 		fmt.Fprintf(l.options.Destination, "%s%s\n", prefix, message)
