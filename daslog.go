@@ -8,7 +8,7 @@
 //      	o := daslog.Options{
 //              Destination: os.Stdout,
 //              Prefix:      "{{.O}} [{{.Q}}]: ",
-//              LogLevel:    daslog.UrgencyLevelCritical,
+//              LogLevel:    daslog.UrgencyLevelNotice,
 //      	}
 //
 //      	l, err := daslog.New(o)
@@ -59,9 +59,8 @@ const (
 
 // Options - struct, which is used to configure a Daslog.
 type Options struct {
-	// LogLevel provides the opportunity to choose the level of
-	// information messages.
-	// Each level includes the messages from the previous level.
+	// LogLevel allows to choose log level.
+	// Each level includes messages from levels above, except UrgencyLevelNone.
 	// UrgencyLevelNone     - no messages // 0
 	// UrgencyLevelNotice   - notice      // 1
 	// UrgencyLevelInfo     - info        // 2
@@ -101,16 +100,14 @@ type Options struct {
 	// {{.Q}} - message urgency level                   (info, critical, etc)
 	Prefix string
 
-	// Destination provides the opportunity to choose the own
-	// destination for log messages (errors, info, etc).
+	// Destination allows to choose the destination for log messages.
 	//
 	// Default: 'os.Stdout'.
 	Destination io.Writer
 
-	// Destinations provides the opportunity to choose several destinations
-	// for delivery of log messages.
+	// Destinations allows to choose several destinations for delivery of log messages.
 	//
-	// If 'Destinations' is selected - 'Destination' will be ignored.
+	// If 'Destinations' is selected - 'Destination' option will be ignored.
 	Destinations []io.Writer
 
 	// LogHandler takes a log messages to bypass the internal
@@ -235,7 +232,7 @@ func (l *Daslog) logHandler(urgencyLevel UrgencyLevel, message string) {
 		return
 	}
 
-	if urgencyLevel <= l.options.LogLevel {
+	if urgencyLevel >= l.options.LogLevel {
 		prefix := l.options.Prefix
 
 		if l.templateInPrefix {
