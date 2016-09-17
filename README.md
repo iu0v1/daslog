@@ -4,9 +4,13 @@ Daslog is a simple logger package for Go (golang) programms.
 
 **DA**mn **S**imple **LOG**ger.
 
-```
-go get -u github.com/iu0v1/daslog
-```
+Current:
+
+` go get gopkg.in/iu0v1/daslog.v2 `
+
+Old:
+
+` go get gopkg.in/iu0v1/daslog.v1 `
 
 ### Why?
 Yes. This is yet another logger. I made this package, because any other logger that I met - is a monster. They can do a lot of tricks, with one exception - a simple and transparent logging. Sometimes, you need only logging, without the possibility of launching a space shuttle through the services of Amazon or Google.
