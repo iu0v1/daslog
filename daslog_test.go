@@ -35,37 +35,33 @@ func TestMain(t *testing.T) {
 
 	l, err := New(Options{
 		Destination: &buf,
-		LogLevel:    UrgencyLevelCritical,
+		LogLevel:    UrgencyLevelNotice,
 	})
 	chkerr(err, t, "fail to init Daslog")
 
 	l.Notice("Notice")
-	l.Noticef("Noticef")
+	l.Noticef("Noticef\n")
 	l.Info("Info")
-	l.Infof("Infof")
+	l.Infof("Infof\n")
 	l.Error("Error")
-	l.Errorf("Errorf")
+	l.Errorf("Errorf\n")
 	l.Critical("Critical")
-	l.Criticalf("Criticalf")
+	l.Criticalf("Criticalf\n")
 
 	outTests := []outTest{
-		outTest{N: "Notice", E: "Notice"},
-		outTest{N: "Noticef", E: "Noticef"},
-		outTest{N: "Info", E: "Info"},
-		outTest{N: "Infof", E: "Infof"},
-		outTest{N: "Error", E: "Error"},
-		outTest{N: "Errorf", E: "Errorf"},
-		outTest{N: "Critical", E: "Critical"},
-		outTest{N: "Criticalf", E: "Criticalf"},
+		outTest{N: "Notice", E: "Notice\n"},
+		outTest{N: "Noticef", E: "Noticef\n"},
+		outTest{N: "Info", E: "Info\n"},
+		outTest{N: "Infof", E: "Infof\n"},
+		outTest{N: "Error", E: "Error\n"},
+		outTest{N: "Errorf", E: "Errorf\n"},
+		outTest{N: "Critical", E: "Critical\n"},
+		outTest{N: "Criticalf", E: "Criticalf\n"},
 	}
 
-	outTestsBuf := strings.Split(buf.String(), "\n")
+	outTestsBuf := strings.SplitAfterN(buf.String(), "\n", 8)
 
 	for i, tst := range outTestsBuf {
-		if i == len(outTestsBuf)-1 {
-			continue
-		}
-
 		if tst != outTests[i].E {
 			t.Fatalf("'%s' != '%s' (out test: #%d, name: %s)\n", outTests[i].E, tst, i, outTests[i].N)
 		}
@@ -74,39 +70,39 @@ func TestMain(t *testing.T) {
 	prfxTests := []prfxTmplTest{
 		prfxTmplTest{
 			E: time.Now().Local().Format("2006-01-02"),
-			O: Options{Prefix: "{{.F}} ", LogLevel: UrgencyLevelCritical},
+			O: Options{Prefix: "{{.F}} ", LogLevel: UrgencyLevelNotice},
 		},
 		prfxTmplTest{
 			E: time.Now().Local().Format("2006"),
-			O: Options{Prefix: "{{.Y}} ", LogLevel: UrgencyLevelCritical},
+			O: Options{Prefix: "{{.Y}} ", LogLevel: UrgencyLevelNotice},
 		},
 		prfxTmplTest{
 			E: time.Now().Local().Format("06"),
-			O: Options{Prefix: "{{.y}} ", LogLevel: UrgencyLevelCritical},
+			O: Options{Prefix: "{{.y}} ", LogLevel: UrgencyLevelNotice},
 		},
 		prfxTmplTest{
 			E: time.Now().Local().Format("01"),
-			O: Options{Prefix: "{{.m}} ", LogLevel: UrgencyLevelCritical},
+			O: Options{Prefix: "{{.m}} ", LogLevel: UrgencyLevelNotice},
 		},
 		prfxTmplTest{
 			E: time.Now().Local().Format("Jan"),
-			O: Options{Prefix: "{{.b}} ", LogLevel: UrgencyLevelCritical},
+			O: Options{Prefix: "{{.b}} ", LogLevel: UrgencyLevelNotice},
 		},
 		prfxTmplTest{
 			E: time.Now().Local().Format("January"),
-			O: Options{Prefix: "{{.B}} ", LogLevel: UrgencyLevelCritical},
+			O: Options{Prefix: "{{.B}} ", LogLevel: UrgencyLevelNotice},
 		},
 		prfxTmplTest{
 			E: time.Now().Local().Format("02"),
-			O: Options{Prefix: "{{.d}} ", LogLevel: UrgencyLevelCritical},
+			O: Options{Prefix: "{{.d}} ", LogLevel: UrgencyLevelNotice},
 		},
 		prfxTmplTest{
 			E: time.Now().Local().Format("Mon"),
-			O: Options{Prefix: "{{.a}} ", LogLevel: UrgencyLevelCritical},
+			O: Options{Prefix: "{{.a}} ", LogLevel: UrgencyLevelNotice},
 		},
 		prfxTmplTest{
 			E: time.Now().Local().Format("PM"),
-			O: Options{Prefix: "{{.p}} ", LogLevel: UrgencyLevelCritical},
+			O: Options{Prefix: "{{.p}} ", LogLevel: UrgencyLevelNotice},
 		},
 	}
 
@@ -132,13 +128,46 @@ func TestMain(t *testing.T) {
 
 	l3, err := New(Options{
 		Destinations: []io.Writer{&buf, &buf2},
-		LogLevel:     UrgencyLevelCritical,
+		LogLevel:     UrgencyLevelNotice,
 	})
 	chkerr(err, t, "fail to init Daslog")
 
 	l3.Info("test")
 
 	if buf.String() != "test\n" || buf2.String() != "test\n" {
-		t.Fatalf("destinations test fail\n")
+		t.Fatalf("destinations test fail; buf == '%s', buf2 == '%s'\n",
+			buf.String(), buf2.String(),
+		)
+	}
+
+	// UL tests
+	buf.Reset()
+	l4, err := New(Options{
+		Destinations: []io.Writer{&buf},
+		LogLevel:     UrgencyLevelNone,
+	})
+	chkerr(err, t, "fail to init Daslog")
+
+	l4.Critical("test")
+	if buf.String() != "" {
+		t.Fatalf("non empty buf: %s \n", buf.String())
+	}
+
+	buf.Reset()
+	l4, err = New(Options{
+		Destinations: []io.Writer{&buf},
+		LogLevel:     UrgencyLevelError,
+	})
+	chkerr(err, t, "fail to init Daslog")
+
+	l4.Notice("notice")
+	l4.Info("info")
+	l4.Error("error")
+	l4.Critical("critical")
+
+	outTestsBuf = strings.SplitAfterN(buf.String(), "\n", 2)
+
+	if len(outTestsBuf) != 2 {
+		t.Fatalf("UL test error #0: %d != 2 \n", len(outTestsBuf))
 	}
 }
