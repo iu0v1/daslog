@@ -244,18 +244,18 @@ func (l *Daslog) logHandler(urgencyLevel UrgencyLevel, message string) {
 
 		if len(l.options.Destinations) != 0 {
 			for _, destination := range l.options.Destinations {
-				fmt.Fprintf(destination, "%s%s\n", prefix, message)
+				fmt.Fprintf(destination, "%s%s", prefix, message)
 			}
 			return
 		}
 
-		fmt.Fprintf(l.options.Destination, "%s%s\n", prefix, message)
+		fmt.Fprintf(l.options.Destination, "%s%s", prefix, message)
 	}
 }
 
 // Log - print message to log.
 func (l *Daslog) Log(urgencyLevel UrgencyLevel, message string) {
-	l.options.Handler(urgencyLevel, message)
+	l.options.Handler(urgencyLevel, message+"\n")
 }
 
 // Logf - print message to log in printf style :)
@@ -265,7 +265,7 @@ func (l *Daslog) Logf(urgencyLevel UrgencyLevel, message string, a ...interface{
 
 // Notice - print "notice" level message to log.
 func (l *Daslog) Notice(message string) {
-	l.options.Handler(UrgencyLevelNotice, message)
+	l.options.Handler(UrgencyLevelNotice, message+"\n")
 }
 
 // Noticef - same as a Notice, but in printf style.
@@ -275,7 +275,7 @@ func (l *Daslog) Noticef(message string, a ...interface{}) {
 
 // Info - print "info" level message to log.
 func (l *Daslog) Info(message string) {
-	l.options.Handler(UrgencyLevelInfo, message)
+	l.options.Handler(UrgencyLevelInfo, message+"\n")
 }
 
 // Infof - same as a Info, but in printf style.
@@ -285,7 +285,7 @@ func (l *Daslog) Infof(message string, a ...interface{}) {
 
 // Error - print "error" level message to log.
 func (l *Daslog) Error(message string) {
-	l.options.Handler(UrgencyLevelError, message)
+	l.options.Handler(UrgencyLevelError, message+"\n")
 }
 
 // Errorf - same as a Error, but in printf style.
@@ -295,7 +295,7 @@ func (l *Daslog) Errorf(message string, a ...interface{}) {
 
 // Critical - print "critical" level message to log.
 func (l *Daslog) Critical(message string) {
-	l.options.Handler(UrgencyLevelCritical, message)
+	l.options.Handler(UrgencyLevelCritical, message+"\n")
 }
 
 // Criticalf - same as a Critical, but in printf style.
