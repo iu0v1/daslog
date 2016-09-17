@@ -11,12 +11,12 @@ func main() {
 	o := daslog.Options{
 		Destination: os.Stdout,
 		Prefix:      "{{.O}} [{{.Q}}]: ",
-		LogLevel:    daslog.UrgencyLevelCritical,
+		LogLevel:    daslog.UrgencyLevelNotice,
 	}
 
 	l, err := daslog.New(o)
 	if err != nil {
-		fmt.Print(err)
+		fmt.Printf("daslog init error: %v\n", err)
 		return
 	}
 
@@ -27,5 +27,5 @@ func main() {
 	l.Info("test info message")
 
 	// error
-	l.Errorf("%s %s %s", "test", "error", "message")
+	l.Errorf("%s %s %s\n", "test", "error", "message")
 }
