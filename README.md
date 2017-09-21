@@ -59,7 +59,7 @@ func main() {
 	o := daslog.Options{
 		Destination: os.Stdout,
 		Prefix:      "{{.O}} [{{.Q}}]: ",
-		LogLevel:    daslog.UrgencyLevelCritical,
+		LogLevel:    daslog.UrgencyLevelNotice,
 	}
 
 	l, err := daslog.New(o)
